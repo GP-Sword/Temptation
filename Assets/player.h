@@ -30,8 +30,7 @@ class Player : public Graphic{
         float respawnCooldown = 0.0f;
         const float RESPAWN_DURATION = 5.0f;
 
-        Vector2 sideCheckSize = Vector2(50, 4);
-        Vector2 groundCheckSize = Vector2(20, 2);
+        Vector2 groundCheckSize = Vector2(24, 2);
     public:
         Vector2 position;
         Vector2 velocity;
@@ -56,11 +55,6 @@ class Player : public Graphic{
         SDL_Rect getPlayerRect() {
             SDL_Rect playerRect = {static_cast<int>(position.x), static_cast<int>(position.y), frameWidth, frameHeight};
             return playerRect;
-        }
-
-        SDL_Rect getsidecheckRect() {
-            SDL_Rect sideCheckRect = {static_cast<int>(position.x + 9), static_cast<int>(position.y + 22), static_cast<int>(sideCheckSize.x), static_cast<int>(sideCheckSize.y)};
-            return sideCheckRect;
         }
 
         SDL_Rect getGroundcheckRect() {

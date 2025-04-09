@@ -71,8 +71,12 @@ void Player::handleInput(const SDL_Event& e) {
 }
 
 void Player::applyGravity(float deltaTime) {
-    if (!onGround || fabs(velocity.y) > 0.01f) {
+    if (velocity.y < 0.01f) {
+        // If jumping up
         velocity.y += gravity * deltaTime;
+    } else if (velocity.y > 0.01f ) {
+        // If falling down, increased gravity
+        velocity.y += gravity * deltaTime * 1.5f;
     } else {
         velocity.y = 0.0f; // Snap it cleanly
     }
@@ -92,8 +96,9 @@ void Player::update(float deltaTime) {
     }
 
     applyGravity(deltaTime);
-    position.x += velocity.x * deltaTime;
-    position.y += velocity.y * deltaTime;
+
+    position.x += static_cast<int>(velocity.x * deltaTime);
+    position.y += static_cast<int>(velocity.y * deltaTime);
 
     // if (onGround) {
     //     std::cout << "ON GROUND!\n";
@@ -102,43 +107,64 @@ void Player::update(float deltaTime) {
     // }
 
     SDL_Rect playerRect = this->getPlayerRect();
-
+    
     if (position.y > 1000.0f) {
         std::cout << "Player fell out of bounds! Respawning...\n";
         respawn();
         return;
     }
 
+    // Check vertical collision
     for (auto& terrain : graphic.getTerrains()) {
         SDL_Rect terrainRect = terrain->getRect();
-        SDL_Rect sideCheckRect = this->getsidecheckRect();
         SDL_Rect groundCheckRect = this->getGroundcheckRect();
+        // Check next frame
+        SDL_Rect nextGroundCheckRect = groundCheckRect;
+        nextGroundCheckRect.y += static_cast<int>(velocity.y * deltaTime);
 
-        if (checkCollision(sideCheckRect, terrainRect)) {
-            velocity.x = 0;
-            float newX;
-            std::cout << "collided with block" << std::endl;
-        } else {
-            std::cout << "not collided" << std::endl;
+        // If collide next frame, velocity = 0
+        if (checkCollision(nextGroundCheckRect, terrainRect)) {
+            // std::cout << "Colliding with " << terrainRect.x << " " << terrainRect.y << "\n!";
+            if (velocity.y > 0.1f) {
+                velocity.y /= 2.0f;
+            } else {
+                velocity.y = 0;
+            }
         }
 
+        // Check if grounded
         if (checkCollision(groundCheckRect, terrainRect)) {
-            // std::cout << "Colliding with " << terrainRect.x << " " << terrainRect.y << "\n!";
             float newY = terrainRect.y - frameHeight;
-            // float newX = terrainRect.x - groundCheckRect.x;
-            velocity.y = 0;
             onGround = true;
+
             // if stuck then snap up
             if (position.y > newY - 0.5f && position.y < newY + 12.0f) {
                 position.y = newY;
             }
-            // if (position.x > newX - 1.0f && abs(position.y - terrainRect.y) > 50) {
-            //     velocity.x = 0;
-            // }
             break;
         } else {
             onGround = false;
         }
+    }
+
+    // Check horizontal collision
+    for (auto& terrain : graphic.getTerrains()) {
+        SDL_Rect terrainRect = terrain->getRect();
+        SDL_Rect nextFrameRect = {playerRect.x + 9, playerRect.y, playerRect.w - 18, playerRect.h - 20};
+        nextFrameRect.x += static_cast<int>(velocity.x * deltaTime);
+
+        if (checkCollision(nextFrameRect, terrainRect)) {
+            // std::cout << "Colliding with " << terrainRect.x << " " << terrainRect.y << "\n!";
+            if (velocity.x > 0) {
+                // If collide to the left of terrain
+                position.x = terrainRect.x - frameWidth + 4;
+            } else if (velocity.x < 0) {
+                // If collide to the right of terrain
+                position.x = terrainRect.x + frameWidth - 4;
+            }
+            velocity.x = 0;
+            break;
+        } 
     }
 
     // if (frameCounter % 200 == 0) {

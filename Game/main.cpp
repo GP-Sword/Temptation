@@ -3,6 +3,10 @@
 #include "graphic.h"
 #include "player.h"
 
+const int TARGET_FPS = 60;
+const float TARGET_FRAMETIME = 1000.0f / TARGET_FPS;
+const float FIXED_DELTATIME = 1.0f / TARGET_FPS;
+
 int main(int argc, char* argv[]) {
     Graphic game;
     game.initSDL(1200, 800, "Temptation");
@@ -23,9 +27,8 @@ int main(int argc, char* argv[]) {
     Uint32 lastTicks = SDL_GetTicks();
 
     while (running) {
-        Uint32 currentTicks = SDL_GetTicks();
-        float deltaTime = (currentTicks - lastTicks) / 1000.0f;
-        lastTicks = currentTicks;
+        Uint32 frameStartTicks = SDL_GetTicks();
+
         while (SDL_PollEvent(&e)) {
             game.handleEvents(e);
             if (e.type == SDL_QUIT) {
@@ -64,7 +67,7 @@ int main(int argc, char* argv[]) {
                 game.renderLevel(renderer, currentState);
                 if (player) {
                     player->render();
-                    player->update(deltaTime);
+                    player->update(FIXED_DELTATIME);
                 } else {
                     std::cerr << "Player not found!\n";
                 }
@@ -74,6 +77,16 @@ int main(int argc, char* argv[]) {
                 break;
         }
         SDL_RenderPresent(renderer);
+
+        Uint32 frameEndTicks = SDL_GetTicks();
+        Uint32 frameDurationMs = frameEndTicks - frameStartTicks;
+
+        if (frameDurationMs < TARGET_FRAMETIME) {
+            Uint32 delayTime = static_cast<Uint32>(TARGET_FRAMETIME - frameDurationMs);
+            SDL_Delay(delayTime);
+        }
+
+        lastTicks = SDL_GetTicks();
     }
 
     game.quitSDL();
