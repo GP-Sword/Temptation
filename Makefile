@@ -3,7 +3,7 @@ CFLAGS = -I "D:\coding\SDL2\base sdl2\SDL2\x86_64-w64-mingw32\include\SDL2" \
          -I "D:\coding\SDL2\base sdl2\SDL2_image-2.8.5\x86_64-w64-mingw32\include\SDL2" \
          -I ./Assets \
          -I ./Game \
-         -I ./Imgs
+         -I ./
 
 LDFLAGS = -L "D:\coding\SDL2\base sdl2\SDL2\x86_64-w64-mingw32\lib" \
           -L "D:\coding\SDL2\base sdl2\SDL2_image-2.8.5\x86_64-w64-mingw32\lib" \
@@ -11,7 +11,7 @@ LDFLAGS = -L "D:\coding\SDL2\base sdl2\SDL2\x86_64-w64-mingw32\lib" \
 
 SOURCES = $(wildcard ./Game/*.cpp) $(wildcard ./Assets/*.cpp)
 
-EXE_NAME = main.exe
+EXE_NAME = main
 
 all:
 	$(CC) $(CFLAGS) -o $(EXE_NAME) $(SOURCES) $(LDFLAGS)
