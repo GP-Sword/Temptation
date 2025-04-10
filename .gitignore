@@ -1,6 +1,3 @@
-/src/include
 /.vscode
-/main.exe
-/Makefile
-/makefile
-/MAKEFILE
+Makefile
+main.exe
