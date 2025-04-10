@@ -6,6 +6,7 @@
 #include <string.h>
 #include <string>
 #include "graphic.h"
+#include "checkpoint.h"
 #include "vector2.h"
 #include "terrain.h"
 
@@ -29,6 +30,8 @@ class Player : public Graphic{
         bool isRespawning = false;
         float respawnCooldown = 0.0f;
         const float RESPAWN_DURATION = 5.0f;
+
+        bool isWin = false;
 
         Vector2 groundCheckSize = Vector2(24, 2);
     public:

@@ -33,6 +33,13 @@ void Player::render() {
         SDL_Rect src = {currentFrame * frameWidth, 0, frameWidth, frameHeight};
         SDL_Rect dst = {(int)position.x, (int)position.y, frameWidth, frameHeight}; // Example size
         SDL_RenderCopy(graphic.getRenderer(), character_sprite, &src, &dst);
+
+        // Optional: Draw collision box
+        SDL_Rect playerRect = this->getPlayerRect();
+        SDL_SetRenderDrawBlendMode(graphic.getRenderer(), SDL_BLENDMODE_BLEND); // Enable alpha blending
+        SDL_SetRenderDrawColor(graphic.getRenderer(), 255, 255, 0, 100); // Red, semi-transparent
+        SDL_RenderDrawRect(graphic.getRenderer(), &playerRect);
+        SDL_SetRenderDrawBlendMode(graphic.getRenderer(), SDL_BLENDMODE_NONE); // Disable alpha blending
     }
 }
 
@@ -107,6 +114,17 @@ void Player::update(float deltaTime) {
     // }
 
     SDL_Rect playerRect = this->getPlayerRect();
+
+    Checkpoint* checkpointPtr = this->getCheckpoint();
+
+    if (checkpointPtr) {
+        SDL_Rect checkpointRect = checkpointPtr->getCollisionRect();
+        if (checkCollision(playerRect, checkpointRect)) {
+            std::cout << "Touched flag" << std::endl;
+        }
+    } else {
+        std::cerr << "Failed to fetch checkpoint" << std::endl;
+    }
     
     if (position.y > 1000.0f) {
         std::cout << "Player fell out of bounds! Respawning...\n";

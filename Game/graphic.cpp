@@ -4,6 +4,7 @@
 #include "button.h"
 #include "terrain.h"
 #include "player.h"
+#include "checkpoint.h"
 #include <fstream>
 
 std::string getAssetPath(const std::string& filename) {
@@ -53,6 +54,11 @@ void Graphic::quitSDL() {
         SDL_DestroyWindow(window);
         std::cout << "Window destroyed successfully.\n";
         window = nullptr;
+    }
+
+    if (checkpoint) {
+        delete checkpoint;
+        std::cout << "Checkpoint destroyed successfully.\n";
     }
 
     if (!buttons.empty()) {
@@ -120,6 +126,8 @@ void Graphic::freeTextures() {
     //     }
         buttons.clear();
     // }
+
+    checkpoint = nullptr;
 }
 
 

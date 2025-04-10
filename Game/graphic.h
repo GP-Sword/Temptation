@@ -11,6 +11,7 @@
 class Terrain;
 class Button;
 class Player;
+class Checkpoint;
 
 enum GameState {
     MENU,
@@ -31,6 +32,7 @@ private:
     Player* player;
     std::vector<Button*> buttons;
     std::vector<Terrain*> terrains;
+    Checkpoint* checkpoint;
     GameState gameState;
     SDL_Texture* background_texture;
     SDL_Texture* newBGTexture;
@@ -55,7 +57,9 @@ public:
     // void handleEvent(const SDL_Event& e);
 
     void handleEvents(const SDL_Event& e);
-    void setPlayer(Player* player) {player = player;};
+    void setPlayer(Player* player) {this->player = player;};
+    void setCheckpoint(Checkpoint* checkpoint) {this->checkpoint = checkpoint;}
+    Checkpoint* getCheckpoint() {return checkpoint;}
     void modulateTextureColor(SDL_Texture* texture, Uint8 red, Uint8 green, Uint8 blue);
 
     void createTerrain(const std::string& filePath, float x, float y, Vector2 offset, Vector2 collisionBox, bool canKill);

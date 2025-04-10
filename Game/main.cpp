@@ -2,10 +2,15 @@
 #include <SDL.h>
 #include "graphic.h"
 #include "player.h"
+#include "checkpoint.h"
 
 const int TARGET_FPS = 60;
 const float TARGET_FRAMETIME = 1000.0f / TARGET_FPS;
 const float FIXED_DELTATIME = 1.0f / TARGET_FPS;
+
+const int CHECKPOINT_OFFSET_X = -8;
+const int CHECKPOINT_OFFSET_Y = -14;
+const SDL_Rect CHECKPOINT_COLLISION_BOX = {7, 0, 36, 50};
 
 int main(int argc, char* argv[]) {
     Graphic game;
@@ -18,6 +23,9 @@ int main(int argc, char* argv[]) {
     Player* player = new Player(game, 50, 450, playerTexture);
     player->setSprite("Imgs/Main Characters/Mask Dude/Idle (32x32).png");
     game.setPlayer(player);
+
+    Checkpoint* checkpoint = new Checkpoint(game, "Imgs/Items/Checkpoints/Checkpoint/Checkpoint (Flag Idle)(64x64).png", {50 + CHECKPOINT_OFFSET_X, 700 + CHECKPOINT_OFFSET_Y}, CHECKPOINT_COLLISION_BOX);
+    player->setCheckpoint(checkpoint);
 
     // Start with the MENU state
     GameState currentState = MENU; 
@@ -70,6 +78,12 @@ int main(int argc, char* argv[]) {
                     player->update(FIXED_DELTATIME);
                 } else {
                     std::cerr << "Player not found!\n";
+                }
+                if (checkpoint) {
+                    checkpoint->render();
+                    checkpoint->update(FIXED_DELTATIME);
+                } else {
+                    std::cerr << "Checkpoint not found!\n";
                 }
                 break;
             case QUIT:
