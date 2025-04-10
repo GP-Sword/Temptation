@@ -14,16 +14,22 @@ class Terrain : public Graphic {
         Graphic& graphic;
         SDL_Renderer* renderer;
         std::string texturePath;
+        Vector2 offset;
+        Vector2 collisionBox;
+        bool canKill;
     public:
         Vector2 position;
         // Vector2 velocity; maybe in the future blocks are meant to move. not right now though. i am dead
-        Terrain(Graphic& graphic, float positionX, float positionY, SDL_Texture* sprite);
+        Terrain(Graphic& graphic, float positionX, float positionY, SDL_Texture* sprite, Vector2 offset, Vector2 collisionBox, bool canKill = false);
         ~Terrain();
         SDL_Texture* getSprite();
         void setSprite(SDL_Texture* sprite);
         void render();
         bool isFallThrough();
         std::string getTexturePath() { return texturePath;}
+        bool getCanKill() {
+            return canKill;
+        }
         SDL_Rect getRect() {
             return rect;
         }

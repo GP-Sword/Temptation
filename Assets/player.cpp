@@ -120,10 +120,17 @@ void Player::update(float deltaTime) {
         SDL_Rect groundCheckRect = this->getGroundcheckRect();
         // Check next frame
         SDL_Rect nextGroundCheckRect = groundCheckRect;
+        SDL_Rect nextHeadbuttRect = groundCheckRect;
         nextGroundCheckRect.y += static_cast<int>(velocity.y * deltaTime);
+        nextHeadbuttRect.y -= frameHeight + 1;
 
         // If collide next frame, velocity = 0
         if (checkCollision(nextGroundCheckRect, terrainRect)) {
+            if (terrain->getCanKill()) {
+                std::cout << "Player hit spike and died!" << std::endl;
+                respawn();
+                break;
+            }
             // std::cout << "Colliding with " << terrainRect.x << " " << terrainRect.y << "\n!";
             if (velocity.y > 0.1f) {
                 velocity.y /= 2.0f;
@@ -132,8 +139,24 @@ void Player::update(float deltaTime) {
             }
         }
 
+        if (checkCollision(nextHeadbuttRect, terrainRect)) {
+            if (terrain->getCanKill()) {
+                std::cout << "Player hit spike and died!" << std::endl;
+                respawn();
+                break;
+            }
+            position.y = terrainRect.y + frameHeight + 1;
+            velocity.y = 50;
+        }
+
         // Check if grounded
         if (checkCollision(groundCheckRect, terrainRect)) {
+            if (terrain->getCanKill()) {
+                std::cout << "Player hit spike and died!" << std::endl;
+                respawn();
+                break;
+            }
+
             float newY = terrainRect.y - frameHeight;
             onGround = true;
 
@@ -150,10 +173,15 @@ void Player::update(float deltaTime) {
     // Check horizontal collision
     for (auto& terrain : graphic.getTerrains()) {
         SDL_Rect terrainRect = terrain->getRect();
-        SDL_Rect nextFrameRect = {playerRect.x + 9, playerRect.y, playerRect.w - 18, playerRect.h - 20};
+        SDL_Rect nextFrameRect = {playerRect.x + 9, playerRect.y + 20, playerRect.w - 18, playerRect.h - 40};
         nextFrameRect.x += static_cast<int>(velocity.x * deltaTime);
 
         if (checkCollision(nextFrameRect, terrainRect)) {
+            if (terrain->getCanKill()) {
+                std::cout << "Player hit spike and died!" << std::endl;
+                respawn();
+                break;
+            }
             // std::cout << "Colliding with " << terrainRect.x << " " << terrainRect.y << "\n!";
             if (velocity.x > 0) {
                 // If collide to the left of terrain

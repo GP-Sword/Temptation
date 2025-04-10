@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "vector2.h"
 
 class Terrain;
 class Button;
@@ -57,7 +58,7 @@ public:
     void setPlayer(Player* player) {player = player;};
     void modulateTextureColor(SDL_Texture* texture, Uint8 red, Uint8 green, Uint8 blue);
 
-    void createTerrain(const std::string& filePath, float x, float y);
+    void createTerrain(const std::string& filePath, float x, float y, Vector2 offset, Vector2 collisionBox, bool canKill);
     std::vector<Terrain*> getTerrains() {return terrains;};
     bool loadTerrain(const std::string& filePath);
     void saveTerrain(const std::string& terrainFilePath);

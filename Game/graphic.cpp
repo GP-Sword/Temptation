@@ -233,11 +233,11 @@ void Graphic::renderLevel(SDL_Renderer* renderer, GameState gameState) {
     }
 }
 
-void Graphic::createTerrain(const std::string& filePath, float x, float y) {
+void Graphic::createTerrain(const std::string& filePath, float x, float y, Vector2 offset, Vector2 collisionBox, bool canKill) {
     // std::cout << "createTerrain called\n";
     // std::cout << "Renderer being passed into createTerrain: " << this->getRenderer() << std::endl;
     SDL_Texture* temp_terrain = loadTexture(filePath);
-    terrains.emplace_back(new Terrain(*this, x, y, temp_terrain));
+    terrains.emplace_back(new Terrain(*this, x, y, temp_terrain, offset, collisionBox, canKill));
 }
 
 bool Graphic::loadTerrain(const std::string& filePath) {
@@ -247,6 +247,9 @@ bool Graphic::loadTerrain(const std::string& filePath) {
     std::ifstream myfile(filePath);
     std::string terrainFilePath;
     float tempX, tempY;
+    Vector2 offset;
+    Vector2 collisionBox;
+    bool canKill;
     if (!myfile.is_open()) {
         std::cerr << "Problem opening terrain file: " << filePath << std::endl;
         this->setGameState(initialGameState);
@@ -254,8 +257,8 @@ bool Graphic::loadTerrain(const std::string& filePath) {
         buttons.push_back(new Button(*this, "Imgs/Menu/Buttons/Back.png", 10, 10, 48, 48, MENU));
         return false; 
     }
-    while (myfile >> terrainFilePath >> tempX >> tempY) {
-        createTerrain(terrainFilePath, tempX, tempY);
+    while (myfile >> terrainFilePath >> tempX >> tempY >> offset.x >> offset.y >> collisionBox.x >> collisionBox.y >> canKill) {
+        createTerrain(terrainFilePath, tempX, tempY, offset, collisionBox, canKill);
     }
     myfile.close();
     return true; 
