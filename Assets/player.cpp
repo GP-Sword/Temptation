@@ -173,7 +173,7 @@ void Player::update(float deltaTime) {
     // Check horizontal collision
     for (auto& terrain : graphic.getTerrains()) {
         SDL_Rect terrainRect = terrain->getRect();
-        SDL_Rect nextFrameRect = {playerRect.x + 9, playerRect.y + 20, playerRect.w - 18, playerRect.h - 40};
+        SDL_Rect nextFrameRect = {playerRect.x + 9, playerRect.y + 5, playerRect.w - 18, playerRect.h - 10};
         nextFrameRect.x += static_cast<int>(velocity.x * deltaTime);
 
         if (checkCollision(nextFrameRect, terrainRect)) {

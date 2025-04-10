@@ -26,7 +26,7 @@ Imgs\Terrain\grass_block.png 950 750 0 0 50 50 0
 Imgs\Terrain\grass_block.png 1000 750 0 0 50 50 0
 Imgs\Terrain\grass_block.png 1050 750 0 0 50 50 0
 Imgs\Terrain\grass_block.png 1100 750 0 0 50 50 0
-Imgs\Traps\Spikes\Idle.png 1100 700 0 30 50 20 1
+Imgs\Traps\Spikes\Idle.png 1100 700 2 34 46 16 1
 Imgs\Terrain\grass_block.png 1150 750 0 0 50 50 0
 Imgs\Terrain\grass_block.png 1200 750 0 0 50 50 0
 
