@@ -13,6 +13,9 @@ std::string getAssetPath(const std::string& filename) {
 }
 
 void Graphic::initSDL(int SCREEN_WIDTH, int SCREEN_HEIGHT, const char* WINDOW_TITLE) {
+    this->screenWidth = SCREEN_WIDTH;
+    this->screenHeight = SCREEN_HEIGHT;
+
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         logErrorAndExit("Error at Init: ", SDL_GetError());
     }
@@ -27,48 +30,88 @@ void Graphic::initSDL(int SCREEN_WIDTH, int SCREEN_HEIGHT, const char* WINDOW_TI
     renderer = SDL_CreateRenderer(window, -1, 0);
     // std::cout << "Yo bro u just created a new renderer " << renderer << std::endl;
     if(renderer == nullptr){
-
         std::cout << "Error creating renderer" << SDL_GetError() << std::endl;
         return;
     }
+
+    cameraRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 }
 
 void Graphic::quitSDL() {
     if (player) {
-        std::cout << "Player successfully deleted.\n";
         delete player;
-    }
-    if(texture || background_texture) {
-        SDL_DestroyTexture(texture);
-        SDL_DestroyTexture(background_texture);
-        std::cout << "Texture destroyed successfully.\n";
-        texture = nullptr;
-    }
-
-    if (renderer) {
-        SDL_DestroyRenderer(renderer);
-        std::cout << "Renderer destroyed successfully.\n";
-        renderer = nullptr;
-    }
-    if (window) {
-        SDL_DestroyWindow(window);
-        std::cout << "Window destroyed successfully.\n";
-        window = nullptr;
+        player = nullptr;
+        std::cout << "Player successfully deleted.\n";
+    } else {
+        // std::cout << "Player was null.\n";
     }
 
     if (checkpoint) {
         delete checkpoint;
+        checkpoint = nullptr;
         std::cout << "Checkpoint destroyed successfully.\n";
+    } else {
+        // std::cout << "Checkpoint was null.\n";
     }
 
     if (!buttons.empty()) {
-        for (auto& button : buttons) {
+        for (auto& button : buttons) { 
             delete button;
+            button = nullptr; 
         }
+        buttons.clear();
         std::cout << "Buttons destroyed successfully.\n";
+    } else {
+        // std::cout << "Buttons was null.\n";
     }
+
+    if (!terrains.empty()) {
+        for (auto& terrain : terrains) {
+            delete terrain;
+            terrain = nullptr;
+        }
+        terrains.clear();
+        std::cout << "Terrains destroyed successfully.\n";
+    } else {
+        // std::cout << "Terrains was null.\n";
+    }
+
+    if (texture) {
+        SDL_DestroyTexture(texture);
+        texture = nullptr;
+        std::cout << "General texture destroyed successfully.\n";
+    }
+    if (background_texture) {
+        SDL_DestroyTexture(background_texture);
+        background_texture = nullptr;
+        std::cout << "Menu background texture destroyed successfully.\n";
+    }
+     if (newBGTexture) {
+        SDL_DestroyTexture(newBGTexture);
+        newBGTexture = nullptr;
+        std::cout << "Level background texture destroyed successfully.\n";
+    }
+ 
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
+        std::cout << "Renderer destroyed successfully.\n";
+    } else {
+        // std::cout << "Renderer was already null.\n"; 
+    }
+
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+        std::cout << "Window destroyed successfully.\n";
+    } else { 
+        // std::cout << "Window pointer was already null.\n"; 
+    }
+    
     IMG_Quit();
     SDL_Quit();
+
+    std::cout << "SDL Quit completed.\n";
 }
 
 SDL_Texture* Graphic::loadTexture(const std::string& filepath) {
@@ -91,13 +134,43 @@ SDL_Texture* Graphic::loadTexture(const std::string& filepath) {
     return newTexture;
 }
 
-void Graphic::renderTexture(SDL_Texture* texture, int x, int y, int w, int h) {
+void Graphic::renderTexture(SDL_Texture* texture, int x, int y, int w, int h, bool useCamera) {
+    renderTexture(texture, nullptr, x, y, w, h, useCamera);
+}
+
+void Graphic::renderTexture(SDL_Texture* texture, const SDL_Rect* srcRect, int x, int y, int w, int h, bool useCamera) {
     if (!texture) {
-        logErrorAndExit("Couldn't load texture: ", IMG_GetError());
+        std::cerr << "Attempted to render null texture!" << std::endl;
+        return;
+    }
+    if (!renderer) {
+        std::cerr << "Attempted to render with null renderer!" << std::endl;
+       return;
+    }
+    
+    SDL_Rect destRect;
+    if (useCamera) {
+        destRect = {x - cameraRect.x, y - cameraRect.y, w, h};
+    } else {
+        destRect = {x, y, w, h};
     }
 
-    SDL_Rect destRect = { x,y,w,h }; // positioning tool
-    SDL_RenderCopy(renderer, texture, NULL, &destRect);
+    SDL_RenderCopy(renderer, texture, srcRect, &destRect);
+}
+
+void Graphic::updateCamera(int playerX, int screenWidth, int levelWidth) {
+    cameraRect.x = playerX - screenWidth / 2;
+
+    if (cameraRect.x < 0) {
+        cameraRect.x = 0;
+    }
+    if (cameraRect.x > levelWidth - screenWidth) {
+        cameraRect.x = levelWidth - screenWidth;
+    }
+
+    cameraRect.y = 0;
+    // cameraRect.w = screenWidth;
+    // cameraRect.h = screenHeight;
 }
 
 
@@ -127,7 +200,7 @@ void Graphic::freeTextures() {
         buttons.clear();
     // }
 
-    checkpoint = nullptr;
+    // std::cout << "Cleared level-specific vectors (freeTextures called)." << std::endl;
 }
 
 
@@ -146,13 +219,15 @@ void Graphic::initMenu() {
     background_texture = loadTexture(backgroundIMG.c_str());
     // renderTexture(background_texture, 0, 0, 1200, 800);
     buttons.clear();
+
     for (int i = 1; i <= 5; i++) {
         std::string filePath = "Imgs/Menu/Levels/0" + std::to_string(i) + ".png";
         Button* temp_button = new Button(*this, filePath, horizontal, 100, 100, 100, static_cast<GameState>(LEVEL_1 + (i - 1)));
         buttons.push_back(temp_button);
         horizontal += 200;
     }
-    buttons.push_back(new Button(*this, "Imgs/Menu/Buttons/Close.png", 1150, 0, 50, 50, QUIT));
+
+    buttons.push_back(new Button(*this, "Imgs/Menu/Buttons/Close.png", screenWidth - 50, 0, 50, 50, QUIT));
 }
 
 void Graphic::renderMenu(SDL_Renderer* renderer) {
@@ -161,10 +236,10 @@ void Graphic::renderMenu(SDL_Renderer* renderer) {
     // std::string backgroundIMG = "Imgs/Background/7481714.jpg";
     // SDL_Texture* background_texture = loadTexture(backgroundIMG.c_str());
     if (background_texture){
-        renderTexture(background_texture, 0, 0, 1200, 800);
+        renderTexture(background_texture, nullptr, 0, 0, screenWidth, screenHeight, false);
     }
     for (auto button : buttons) {
-        button->render();
+        button->render(false);
     }
     // SDL_RenderPresent(renderer);
 }
@@ -231,11 +306,20 @@ void Graphic::renderLevel(SDL_Renderer* renderer, GameState gameState) {
     // std::cout << "Renderer in renderLevel: " << this->renderer << std::endl;
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     if (newBGTexture && newBGTexture != background_texture) {
-        renderTexture(newBGTexture, 0, 0, 1200, 800);
+        // int bgWidth, bgHeight;
+        // SDL_QueryTexture(newBGTexture, NULL, NULL, &bgWidth, &bgHeight);
+
+        // renderTexture(newBGTexture, nullptr, 0, 0, bgWidth, bgHeight, true);
+
+        renderTexture(newBGTexture, nullptr, 0, 0, 1200, 800, false);
+    } else {
+        SDL_RenderClear(renderer);
     }
+
     for (auto button : buttons) {
-        button->render();
+        button->render(false);
     }
+
     for (auto terrain : terrains) {
         terrain->render();
     }
@@ -274,12 +358,6 @@ bool Graphic::loadTerrain(const std::string& filePath) {
 
 Graphic::~Graphic() {
     quitSDL();
-    for (auto& button : buttons) {
-        delete button;
-    }
-    for (auto& terrain : terrains) {
-        delete terrain;
-    }
 }
 
 void Graphic::modulateTextureColor(SDL_Texture* texture, Uint8 red, Uint8 green, Uint8 blue) {

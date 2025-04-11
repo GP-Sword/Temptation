@@ -12,9 +12,13 @@ const int CHECKPOINT_OFFSET_X = -8;
 const int CHECKPOINT_OFFSET_Y = -14;
 const SDL_Rect CHECKPOINT_COLLISION_BOX = {7, 0, 36, 50};
 
+const int SCREEN_WIDTH = 1200;
+const int SCREEN_HEIGHT = 800;
+const int LEVEL_WIDTH = 3000;
+
 int main(int argc, char* argv[]) {
     Graphic game;
-    game.initSDL(1200, 800, "Temptation");
+    game.initSDL(SCREEN_WIDTH, SCREEN_HEIGHT, "Temptation");
     // std::cout << "New Graphic: " << &game << "\n";
     SDL_Renderer* renderer = game.getRenderer(); 
     game.initMenu();
@@ -73,18 +77,23 @@ int main(int argc, char* argv[]) {
                     levelInitialized = true;
                 }
                 game.renderLevel(renderer, currentState);
+
                 if (player) {
                     player->render();
                     player->update(FIXED_DELTATIME);
                 } else {
                     std::cerr << "Player not found!\n";
                 }
+
                 if (checkpoint) {
                     checkpoint->render();
                     checkpoint->update(FIXED_DELTATIME);
                 } else {
                     std::cerr << "Checkpoint not found!\n";
                 }
+
+                game.updateCamera(player->getPos().x, SCREEN_WIDTH, LEVEL_WIDTH);
+
                 break;
             case QUIT:
                 running = false;

@@ -34,6 +34,7 @@ class Player : public Graphic{
         bool isWin = false;
 
         Vector2 groundCheckSize = Vector2(24, 2);
+        SDL_Color hitboxColor = { 255, 255, 0, 100 };
     public:
         Vector2 position;
         Vector2 velocity;

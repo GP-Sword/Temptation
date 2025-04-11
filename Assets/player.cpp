@@ -30,15 +30,25 @@ void Player::setSprite(const std::string& filePath) {
 
 void Player::render() {
     if (character_sprite) {
-        SDL_Rect src = {currentFrame * frameWidth, 0, frameWidth, frameHeight};
-        SDL_Rect dst = {(int)position.x, (int)position.y, frameWidth, frameHeight}; // Example size
-        SDL_RenderCopy(graphic.getRenderer(), character_sprite, &src, &dst);
+        SDL_Rect srcRect = {currentFrame * frameWidth, 0, frameWidth, frameHeight};
+        // SDL_Rect dstRect = {(int)position.x, (int)position.y, frameWidth, frameHeight}; // Example size
+        // SDL_RenderCopy(graphic.getRenderer(), character_sprite, &src, &dst);
+        graphic.renderTexture(character_sprite, &srcRect, (int)position.x, (int)position.y, frameWidth, frameHeight, true);
 
         // Optional: Draw collision box
         SDL_Rect playerRect = this->getPlayerRect();
+        const SDL_Rect& camera = graphic.getCameraRect();
+
+        SDL_Rect playerScreenRect = {
+            playerRect.x - camera.x,
+            playerRect.y - camera.y,
+            playerRect.w,
+            playerRect.h
+        };
+
         SDL_SetRenderDrawBlendMode(graphic.getRenderer(), SDL_BLENDMODE_BLEND); // Enable alpha blending
-        SDL_SetRenderDrawColor(graphic.getRenderer(), 255, 255, 0, 100); // Red, semi-transparent
-        SDL_RenderDrawRect(graphic.getRenderer(), &playerRect);
+        SDL_SetRenderDrawColor(graphic.getRenderer(), hitboxColor.r, hitboxColor.g, hitboxColor.b, hitboxColor.a); // Yellow to Green, Semi-transparent
+        SDL_RenderDrawRect(graphic.getRenderer(), &playerScreenRect);
         SDL_SetRenderDrawBlendMode(graphic.getRenderer(), SDL_BLENDMODE_NONE); // Disable alpha blending
     }
 }
@@ -117,10 +127,18 @@ void Player::update(float deltaTime) {
 
     Checkpoint* checkpointPtr = this->getCheckpoint();
 
+    // SDL_Rect camera = graphic.getCameraRect();
+    // if (&camera) {
+    //     std::cout << camera.x << " " << camera.y << std::endl;
+    // }
+
     if (checkpointPtr) {
         SDL_Rect checkpointRect = checkpointPtr->getCollisionRect();
         if (checkCollision(playerRect, checkpointRect)) {
-            std::cout << "Touched flag" << std::endl;
+            // std::cout << "Touched flag" << std::endl;
+            hitboxColor.r = 0;
+        } else {
+            hitboxColor.r = 255;
         }
     } else {
         std::cerr << "Failed to fetch checkpoint" << std::endl;

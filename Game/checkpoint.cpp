@@ -29,13 +29,23 @@ SDL_Texture* Checkpoint::getTexture() {
 void Checkpoint::render() {
     if (texture) {
         SDL_Rect sourceRect = animationFrames[currentFrame];
-        SDL_Rect destRect = this->rect;
-        SDL_RenderCopy(graphic.getRenderer(), texture, &sourceRect, &destRect);
+        // SDL_Rect destRect = this->rect;
+        // SDL_RenderCopy(graphic.getRenderer(), texture, &sourceRect, &destRect);
+        graphic.renderTexture(texture, &sourceRect, this->rect.x, this->rect.y, this->rect.w, this->rect.h, true);
 
         // Optional: Draw collision box
+        const SDL_Rect& camera = graphic.getCameraRect();
+        SDL_Rect collisionScreenRect = {
+            collisionBox.x - camera.x,
+            collisionBox.y - camera.y,
+            collisionBox.w,
+            collisionBox.h
+        };
+
         SDL_SetRenderDrawBlendMode(graphic.getRenderer(), SDL_BLENDMODE_BLEND); // Enable alpha blending
         SDL_SetRenderDrawColor(graphic.getRenderer(), 255, 0, 0, 100); // Red, semi-transparent
-        SDL_RenderDrawRect(graphic.getRenderer(), &collisionBox);
+        // SDL_RenderDrawRect(graphic.getRenderer(), &collisionBox);
+        SDL_RenderDrawRect(graphic.getRenderer(), &collisionScreenRect);
         SDL_SetRenderDrawBlendMode(graphic.getRenderer(), SDL_BLENDMODE_NONE); // Disable alpha blending
     }
 }

@@ -29,13 +29,19 @@ private:
     SDL_Renderer* renderer;
     SDL_Texture* texture;
     SDL_Surface* loadedSurface;
+
     Player* player;
     std::vector<Button*> buttons;
     std::vector<Terrain*> terrains;
     Checkpoint* checkpoint;
     GameState gameState;
+
     SDL_Texture* background_texture;
     SDL_Texture* newBGTexture;
+
+    SDL_Rect cameraRect = {0, 0, 0, 0};
+    int screenWidth;
+    int screenHeight;
 
 public:
     Graphic() : window(nullptr), renderer(nullptr), texture(nullptr), loadedSurface(nullptr), gameState(MENU), player(nullptr), background_texture(nullptr), newBGTexture(nullptr){} // Constructor initializing pointers to nullptr
@@ -52,7 +58,8 @@ public:
     void initMenu();
     void renderMenu(SDL_Renderer* renderer);
     void renderLevel(SDL_Renderer* renderer, GameState gameState);
-    void renderTexture(SDL_Texture* texture, int x, int y, int w, int h);
+    void renderTexture(SDL_Texture* texture, int x, int y, int w, int h, bool useCamera);
+    void renderTexture(SDL_Texture* texture, const SDL_Rect* srcRect, int x, int y, int w, int h, bool useCamera);
     void deleteTexture();
     // void handleEvent(const SDL_Event& e);
 
@@ -60,7 +67,11 @@ public:
     void setPlayer(Player* player) {this->player = player;};
     void setCheckpoint(Checkpoint* checkpoint) {this->checkpoint = checkpoint;}
     Checkpoint* getCheckpoint() {return checkpoint;}
+    const SDL_Rect& getCameraRect() const {return cameraRect;}
     void modulateTextureColor(SDL_Texture* texture, Uint8 red, Uint8 green, Uint8 blue);
+
+    // update camera
+    void updateCamera(int playerX, int screenWidth, int levelWidth);
 
     void createTerrain(const std::string& filePath, float x, float y, Vector2 offset, Vector2 collisionBox, bool canKill);
     std::vector<Terrain*> getTerrains() {return terrains;};

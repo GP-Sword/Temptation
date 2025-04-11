@@ -36,9 +36,10 @@ void Terrain::setSprite(SDL_Texture* sprite) {
 }
 
 void Terrain::render() {
+    // bool useCamera = true;
     if (terrain_sprite) {
         // std::cout << "Rendering terrain " << terrain_sprite << "!\n"; 
-        graphic.renderTexture(terrain_sprite, static_cast<int>(position.x), static_cast<int>(position.y), 50, 50);
+        graphic.renderTexture(terrain_sprite, static_cast<int>(position.x), static_cast<int>(position.y), 50, 50, true);
         // std::cout << "Terrain at: " << rect.x << " " << rect.y << "!\n";
     } else {
         std::cerr << "Terrain Render() Error: " << SDL_GetError() << " " << IMG_GetError();
