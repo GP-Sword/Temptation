@@ -9,10 +9,12 @@
 #include "checkpoint.h"
 #include "vector2.h"
 #include "terrain.h"
+#include "particle.h"
 
 class Player : public Graphic{
     protected:
         SDL_Texture* character_sprite;
+        SDL_Texture* particleTexture;
         Graphic& graphic;
 
         int frameWidth = 50;
@@ -29,12 +31,19 @@ class Player : public Graphic{
 
         bool isRespawning = false;
         float respawnCooldown = 0.0f;
-        const float RESPAWN_DURATION = 5.0f;
+        const float RESPAWN_DURATION = 2.0f;
 
         bool isWin = false;
 
         Vector2 groundCheckSize = Vector2(24, 2);
         SDL_Color hitboxColor = { 255, 255, 0, 100 };
+
+        // Player death particles
+        std::vector<Particle> particles;
+        float minParticleSize = 5.0f;
+        float maxParticleSize = 15.0f;
+        int numParticles = 100;
+        float minSizeFactor = 0.1f;
     public:
         Vector2 position;
         Vector2 velocity;
@@ -51,10 +60,13 @@ class Player : public Graphic{
         // Terrain setTerrain(int newX, int newY, SDL_Texture* sprite);
         SDL_Texture* getSprite();
         void render();
+        void setParticleTexture(const std::string& filePath);
 
         void handleInput(const SDL_Event& e);
         void applyGravity(float deltaTime);
         bool checkCollision(const SDL_Rect& playerRect, const SDL_Rect& terrainRect);
+        void handlePlayerDeath(float playerX, float playerY, SDL_Texture* particleTexture, std::vector<Particle>& particles, float minParticleSize, float maxParticleSize, int numParticles);
+        void deathAnimation();
 
         SDL_Rect getPlayerRect() {
             SDL_Rect playerRect = {static_cast<int>(position.x), static_cast<int>(position.y), frameWidth, frameHeight};

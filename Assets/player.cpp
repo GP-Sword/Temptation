@@ -28,6 +28,10 @@ void Player::setSprite(const std::string& filePath) {
     character_sprite = graphic.loadTexture(filePath);
 }
 
+void Player::setParticleTexture(const std::string& filePath) {
+    particleTexture = graphic.loadTexture(filePath);
+}
+
 void Player::render() {
     if (character_sprite) {
         SDL_Rect srcRect = {currentFrame * frameWidth, 0, frameWidth, frameHeight};
@@ -85,6 +89,21 @@ void Player::handleInput(const SDL_Event& e) {
             case SDLK_LEFT: case SDLK_RIGHT: velocity.x = 0; break;
         }
     }
+}   
+
+void Player::handlePlayerDeath(float playerX, float playerY, SDL_Texture* particleTexture, std::vector<Particle>& particles,
+    float minParticleSize, float maxParticleSize, int numParticles) {
+    for (int i = 0; i < numParticles; ++i) {
+        particles.push_back(createParticle(playerX, playerY, particleTexture, minParticleSize, maxParticleSize));
+    }
+}
+
+void Player::deathAnimation() {
+    SDL_Rect camera = graphic.getCameraRect();
+    float correctX = position.x - camera.x + 25,
+          correctY = position.y - camera.y + 25;
+
+    handlePlayerDeath(correctX, correctY, particleTexture, particles, minParticleSize, maxParticleSize, numParticles);
 }
 
 void Player::applyGravity(float deltaTime) {
@@ -97,9 +116,21 @@ void Player::applyGravity(float deltaTime) {
     } else {
         velocity.y = 0.0f; // Snap it cleanly
     }
-}//
+}
+
 static int frameCounter = 0;
 void Player::update(float deltaTime) {
+    // Update particles
+    for (auto it = particles.begin(); it != particles.end();) {
+        updateParticle(*it);
+        if (it->lifetime <= 0 || it->size <= (it->originalSize * minSizeFactor)) {
+            it = particles.erase(it);
+        } else {
+            drawParticle(graphic.getRenderer(), *it);
+            ++it;
+        }
+    }
+
     // bool grounded = false;
     frameCounter++;
     if (isRespawning) {
@@ -107,6 +138,7 @@ void Player::update(float deltaTime) {
         if (respawnCooldown <= 0.0f) {
             isRespawning = false;
             respawnCooldown = 0.0f;
+            this->setPos(0, 445);
             std::cout << "Respawn complete!\n";
         }
         return;
@@ -129,7 +161,7 @@ void Player::update(float deltaTime) {
 
     // SDL_Rect camera = graphic.getCameraRect();
     // if (&camera) {
-    //     std::cout << camera.x << " " << camera.y << std::endl;
+    //     std::cout << playerRect.x << " " << playerRect.y << " " << camera.x << " " << camera.y << std::endl;
     // }
 
     if (checkpointPtr) {
@@ -163,6 +195,7 @@ void Player::update(float deltaTime) {
         // If collide next frame, velocity = 0
         if (checkCollision(nextGroundCheckRect, terrainRect)) {
             if (terrain->getCanKill()) {
+                deathAnimation();
                 std::cout << "Player hit spike and died!" << std::endl;
                 respawn();
                 break;
@@ -177,6 +210,7 @@ void Player::update(float deltaTime) {
 
         if (checkCollision(nextHeadbuttRect, terrainRect)) {
             if (terrain->getCanKill()) {
+                deathAnimation();
                 std::cout << "Player hit spike and died!" << std::endl;
                 respawn();
                 break;
@@ -187,11 +221,12 @@ void Player::update(float deltaTime) {
 
         // Check if grounded
         if (checkCollision(groundCheckRect, terrainRect)) {
-            if (terrain->getCanKill()) {
-                std::cout << "Player hit spike and died!" << std::endl;
-                respawn();
-                break;
-            }
+            // if (terrain->getCanKill()) {
+            //     deathAnimation();
+            //     std::cout << "Player hit spike and died!" << std::endl;
+            //     respawn();
+            //     break;
+            // }
 
             float newY = terrainRect.y - frameHeight;
             onGround = true;
@@ -214,6 +249,7 @@ void Player::update(float deltaTime) {
 
         if (checkCollision(nextFrameRect, terrainRect)) {
             if (terrain->getCanKill()) {
+                deathAnimation();     
                 std::cout << "Player hit spike and died!" << std::endl;
                 respawn();
                 break;
@@ -242,7 +278,7 @@ bool Player::checkCollision(const SDL_Rect& playerRect, const SDL_Rect& terrainR
 }
 
 void Player::respawn() {
-    this->setPos(50,700);
+    this->setPos(position.x,-100);
     velocity.x = 0;
     velocity.y = 0;
     isRespawning = true;
