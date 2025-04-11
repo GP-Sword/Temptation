@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     player->setParticleTexture("Imgs/Other/Dust Particle.png");
     game.setPlayer(player);
 
-    Checkpoint* checkpoint = new Checkpoint(game, "Imgs/Items/Checkpoints/Checkpoint/Checkpoint (Flag Idle)(64x64).png", {50 + CHECKPOINT_OFFSET_X, 700 + CHECKPOINT_OFFSET_Y}, CHECKPOINT_COLLISION_BOX);
+    Checkpoint* checkpoint = new Checkpoint(game, "Imgs/Items/Checkpoints/Checkpoint/Checkpoint (Flag Idle)(64x64).png", {550 + CHECKPOINT_OFFSET_X, 700 + CHECKPOINT_OFFSET_Y}, CHECKPOINT_COLLISION_BOX);
     player->setCheckpoint(checkpoint);
 
     // Start with the MENU state

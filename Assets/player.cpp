@@ -98,7 +98,7 @@ void Player::handlePlayerDeath(float playerX, float playerY, SDL_Texture* partic
     }
 }
 
-void Player::deathAnimation() {
+void Player::dustExplosion() {
     SDL_Rect camera = graphic.getCameraRect();
     float correctX = position.x - camera.x + 25,
           correctY = position.y - camera.y + 25;
@@ -129,6 +129,17 @@ void Player::update(float deltaTime) {
             drawParticle(graphic.getRenderer(), *it);
             ++it;
         }
+    }
+
+    if (isWin && onGround) {
+        // std::cout << "Have won" << std::endl;
+        if (!particles.empty()) {
+            // wait
+        } else {
+            graphic.setGameState(MENU);
+            isWin = false;
+        }
+        return;
     }
 
     // bool grounded = false;
@@ -167,6 +178,14 @@ void Player::update(float deltaTime) {
     if (checkpointPtr) {
         SDL_Rect checkpointRect = checkpointPtr->getCollisionRect();
         if (checkCollision(playerRect, checkpointRect)) {
+            // IF CODITION FULFILLED THEN PLAYER HAVE WON
+            // DO WHATEVER YOU WANT WHEN PLAYER WON
+            //
+            if (!isWin) {
+                dustExplosion();
+            }
+            this->handleWin();
+            //
             // std::cout << "Touched flag" << std::endl;
             hitboxColor.r = 0;
         } else {
@@ -195,7 +214,7 @@ void Player::update(float deltaTime) {
         // If collide next frame, velocity = 0
         if (checkCollision(nextGroundCheckRect, terrainRect)) {
             if (terrain->getCanKill()) {
-                deathAnimation();
+                dustExplosion();
                 std::cout << "Player hit spike and died!" << std::endl;
                 respawn();
                 break;
@@ -210,7 +229,7 @@ void Player::update(float deltaTime) {
 
         if (checkCollision(nextHeadbuttRect, terrainRect)) {
             if (terrain->getCanKill()) {
-                deathAnimation();
+                dustExplosion();
                 std::cout << "Player hit spike and died!" << std::endl;
                 respawn();
                 break;
@@ -222,7 +241,7 @@ void Player::update(float deltaTime) {
         // Check if grounded
         if (checkCollision(groundCheckRect, terrainRect)) {
             // if (terrain->getCanKill()) {
-            //     deathAnimation();
+            //     dustExplosion();
             //     std::cout << "Player hit spike and died!" << std::endl;
             //     respawn();
             //     break;
@@ -249,7 +268,7 @@ void Player::update(float deltaTime) {
 
         if (checkCollision(nextFrameRect, terrainRect)) {
             if (terrain->getCanKill()) {
-                deathAnimation();     
+                dustExplosion();     
                 std::cout << "Player hit spike and died!" << std::endl;
                 respawn();
                 break;
@@ -283,4 +302,8 @@ void Player::respawn() {
     velocity.y = 0;
     isRespawning = true;
     respawnCooldown = RESPAWN_DURATION;
+}
+
+void Player::handleWin() {
+    isWin = true;
 }

@@ -42,7 +42,6 @@ private:
     SDL_Rect cameraRect = {0, 0, 0, 0};
     int screenWidth;
     int screenHeight;
-
 public:
     Graphic() : window(nullptr), renderer(nullptr), texture(nullptr), loadedSurface(nullptr), gameState(MENU), player(nullptr), background_texture(nullptr), newBGTexture(nullptr){} // Constructor initializing pointers to nullptr
     ~Graphic(); // Destructor to clean up resources

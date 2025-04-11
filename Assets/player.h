@@ -66,7 +66,7 @@ class Player : public Graphic{
         void applyGravity(float deltaTime);
         bool checkCollision(const SDL_Rect& playerRect, const SDL_Rect& terrainRect);
         void handlePlayerDeath(float playerX, float playerY, SDL_Texture* particleTexture, std::vector<Particle>& particles, float minParticleSize, float maxParticleSize, int numParticles);
-        void deathAnimation();
+        void dustExplosion();
 
         SDL_Rect getPlayerRect() {
             SDL_Rect playerRect = {static_cast<int>(position.x), static_cast<int>(position.y), frameWidth, frameHeight};
@@ -78,6 +78,7 @@ class Player : public Graphic{
             return groundCheckRect;
         }
         void respawn();
+        void handleWin();
 };      
 
 #endif

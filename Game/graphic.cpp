@@ -46,8 +46,8 @@ void Graphic::quitSDL() {
         // std::cout << "Player was null.\n";
     }
 
-    if (checkpoint) {
-        delete checkpoint;
+    if (player->getCheckpoint()) {
+        player->getCheckpoint()->free();
         checkpoint = nullptr;
         std::cout << "Checkpoint destroyed successfully.\n";
     } else {
@@ -172,7 +172,6 @@ void Graphic::updateCamera(int playerX, int screenWidth, int levelWidth) {
     // cameraRect.w = screenWidth;
     // cameraRect.h = screenHeight;
 }
-
 
 void Graphic::logErrorAndExit(const char* msg, const char* error){
     SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "%s: %s", msg, error);
